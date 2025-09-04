@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>출석 이동 중…</title>
+  <style>body{font-family:system-ui,Arial,"Apple SD Gothic Neo","맑은 고딕",sans-serif;margin:24px;color:#333}</style>
+</head>
+<body>
+  <div>출석 페이지로 이동 중…</div>
+  <p><a id="fallback" href="#" style="display:none">이동이 안 되면 여기를 누르세요</a></p>
+  <script>
+  // ⬇⬇⬇ 여기만 네 웹앱 실행 URL(…/exec)로 교체 ⬇⬇⬇
+  const EXEC_BASE = 'https://script.google.com/macros/s/AKfycbwyDeijWkHfL92l7WRcsbLslx6Z1ZU2_q2NDfbqW4cb6m5IDr6dU7fRh9Ww04y-EBXTPg/exec';
+
+  (function(){
+    function pick(n){const s=new URLSearchParams(location.search);
+      const h=new URLSearchParams((location.hash||'').replace(/^#/,''));
+      return s.get(n)||h.get(n);}
+    const k = pick('k');
+    if(!k){ document.body.innerHTML='잘못된 QR입니다(k 없음).'; return; }
+    const target = EXEC_BASE + '?k=' + encodeURIComponent(k);
+
+    // 같은 탭 강제 이동(사파리/인앱 대응)
+    try{ window.top.location.replace(target); }catch(_){ location.replace(target); }
+    setTimeout(()=>{ try{ window.top.location.href=target; }catch(_){ location.href=target; } }, 300);
+
+    // 수동 이동 백업
+    const a=document.getElementById('fallback'); a.href=target; a.style.display='inline';
+  })();
+  </script>
+</body>
+</html>
