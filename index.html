@@ -1,4 +1,5 @@
 
+
 <!doctype html>
 <html lang="ko">
 <head>
@@ -17,7 +18,7 @@
   <h1 style="margin:0 0 12px 0;font-size:18px">출석 페이지로 이동 중…</h1>
   <p class="muted" id="info">자동으로 이동하지 않으면 아래 버튼을 눌러 주세요.</p>
 
-  <!-- ★ 이 action 값을 '현재' Apps Script 웹앱 실행 URL(/exec)로 교체 -->
+  <!-- ★ 여기 action= 값을 '현재' 웹앱 실행 URL(/exec)로 정확히 -->
   <form id="relay" method="POST"
         action="https://script.google.com/macros/s/AKfycbzfSPRnrzo730FMLSJ4GcNVmrqrtVXstJsxPi2KVInZJQdTyNxEcYDf5sp-z4jP8mhylA/exec"
         target="_self" accept-charset="utf-8">
@@ -30,48 +31,25 @@
     <a class="btn" id="getlink" href="#">수동 이동 (대체)</a>
   </p>
 
-  <noscript>
-    <p><strong>자바스크립트가 꺼져 있습니다.</strong> 위 버튼을 눌러 이동하세요.</p>
-  </noscript>
-
   <script>
     (function(){
-      // 쿼리스트링 또는 해시에서 파라미터 읽기
       function pick(n){
-        const s = new URLSearchParams(location.search);
-        const h = new URLSearchParams((location.hash||'').replace(/^#/, ''));
-        return s.get(n) || h.get(n);
+        const s=new URLSearchParams(location.search);
+        const h=new URLSearchParams((location.hash||'').replace(/^#/,''));
+        return s.get(n)||h.get(n);
       }
-
       var k = pick('k');
-      if(!k){
-        document.body.innerHTML = '<p>잘못된 QR입니다 (k 없음).</p>';
-        return;
-      }
+      if(!k){ document.body.innerHTML='<p>잘못된 QR입니다 (k 없음).</p>'; return; }
 
-      var form   = document.getElementById('relay');
-      var inputK = document.getElementById('k');
-      inputK.value = k;
+      var form = document.getElementById('relay');
+      document.getElementById('k').value = k;
 
-      // 실패 대비: GET 대체 링크도 준비 (사용자 수동 클릭용)
+      // 수동 GET 대체 링크(사용자 클릭용)
       var alt = form.action.replace(/\/exec(?:\?.*)?$/,'/exec') + '?k=' + encodeURIComponent(k);
-      var getlink = document.getElementById('getlink');
-      getlink.href = alt;
+      document.getElementById('getlink').href = alt;
 
-      // 일부 인앱 브라우저/OS에서 자동 전송이 지연될 수 있으므로, 약간의 대기 후 자동 제출
-      // POST 전송 → 외부 앱(Drive 등)이 가로채기 어려움
-      try {
-        // 바로 제출
-        form.submit();
-      } catch(e) {
-        // 안전 대기 후 재시도
-        setTimeout(function(){ try{ form.submit(); }catch(_){ } }, 80);
-      }
-
-      // 만약 1초 내 이동 실패 시 수동 링크 노출
-      setTimeout(function(){
-        document.getElementById('fail').style.display = 'block';
-      }, 1000);
+      try { form.submit(); } catch(_) { setTimeout(function(){ try{ form.submit(); }catch(e){} }, 80); }
+      setTimeout(function(){ document.getElementById('fail').style.display='block'; }, 1000);
     })();
   </script>
 </body>
