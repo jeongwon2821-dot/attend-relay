@@ -1,56 +1,46 @@
-
-
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>출석 이동 중…</title>
-  <style>
-    :root { color-scheme: light dark; }
-    body{font-family:system-ui,Arial,"Apple SD Gothic Neo","맑은 고딕",sans-serif;margin:24px;line-height:1.5}
-    .muted{color:#666}
-    .btn{display:inline-block;padding:10px 14px;border:1px solid #ddd;border-radius:10px;background:#fff;text-decoration:none}
-  </style>
-  <meta name="referrer" content="no-referrer">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>출석 이동 중…</title>
+<style>
+  :root{color-scheme:light dark}
+  body{font-family:system-ui,Arial,"Apple SD Gothic Neo","맑은 고딕",sans-serif;margin:24px;line-height:1.5}
+  .muted{color:#666}.btn{display:inline-block;padding:10px 14px;border:1px solid #ddd;border-radius:10px;background:#fff;text-decoration:none}
+</style>
+<meta name="referrer" content="no-referrer">
 </head>
 <body>
-  <h1 style="margin:0 0 12px 0;font-size:18px">출석 페이지로 이동 중…</h1>
-  <p class="muted" id="info">자동으로 이동하지 않으면 아래 버튼을 눌러 주세요.</p>
+<h1 style="margin:0 0 12px 0;font-size:18px">출석 페이지로 이동 중…</h1>
+<p class="muted" id="info">자동으로 이동하지 않으면 아래 버튼을 누르세요.</p>
 
-  <!-- ★ 여기 action= 값을 '현재' 웹앱 실행 URL(/exec)로 정확히 -->
-  <form id="relay" method="POST"
-        action="https://script.google.com/macros/s/AKfycbzfSPRnrzo730FMLSJ4GcNVmrqrtVXstJsxPi2KVInZJQdTyNxEcYDf5sp-z4jP8mhylA/exec"
-        target="_self" accept-charset="utf-8">
-    <input type="hidden" name="k" id="k">
-    <button class="btn" type="submit">수동으로 이동</button>
-  </form>
+<!-- ★ 여기를 “현재” Apps Script 웹앱 실행 URL(/exec)로 교체 -->
+<form id="relay" method="POST"
+      action="https://script.google.com/macros/s/AKfycbxAwb1Ao8bpEFF6eHfWgJ2dA5PrD9unWE_FJL-PGufBJfbr6hwVXJbqJYJv4Jw3Yfdc/exec"
+      target="_self" accept-charset="utf-8">
+  <input type="hidden" name="k" id="k">
+  <button class="btn" type="submit">수동으로 이동</button>
+</form>
 
-  <p style="margin-top:12px;display:none" id="fail">
-    문제가 지속되면 다음 링크를 눌러 이동하세요:
-    <a class="btn" id="getlink" href="#">수동 이동 (대체)</a>
-  </p>
+<p style="margin-top:12px;display:none" id="fail">
+  문제가 지속되면 다음 링크를 눌러 이동하세요:
+  <a class="btn" id="getlink" href="#">수동 이동(대체)</a>
+</p>
 
-  <script>
-    (function(){
-      function pick(n){
-        const s=new URLSearchParams(location.search);
-        const h=new URLSearchParams((location.hash||'').replace(/^#/,''));
-        return s.get(n)||h.get(n);
-      }
-      var k = pick('k');
-      if(!k){ document.body.innerHTML='<p>잘못된 QR입니다 (k 없음).</p>'; return; }
+<script>
+(function(){
+  function pick(n){ const s=new URLSearchParams(location.search); const h=new URLSearchParams((location.hash||'').replace(/^#/,'')); return s.get(n)||h.get(n); }
+  var k=pick('k'); if(!k){ document.body.innerHTML='<p>잘못된 QR입니다(k 없음).</p>'; return; }
+  var form=document.getElementById('relay'); document.getElementById('k').value=k;
 
-      var form = document.getElementById('relay');
-      document.getElementById('k').value = k;
+  // 실패 대비 GET 대체 링크
+  var alt=form.action.replace(/\/exec(?:\?.*)?$/,'/exec') + '?k=' + encodeURIComponent(k);
+  document.getElementById('getlink').href=alt;
 
-      // 수동 GET 대체 링크(사용자 클릭용)
-      var alt = form.action.replace(/\/exec(?:\?.*)?$/,'/exec') + '?k=' + encodeURIComponent(k);
-      document.getElementById('getlink').href = alt;
-
-      try { form.submit(); } catch(_) { setTimeout(function(){ try{ form.submit(); }catch(e){} }, 80); }
-      setTimeout(function(){ document.getElementById('fail').style.display='block'; }, 1000);
-    })();
-  </script>
+  try{ form.submit(); }catch(e){ setTimeout(function(){ try{ form.submit(); }catch(_){} }, 80); }
+  setTimeout(function(){ document.getElementById('fail').style.display='block'; }, 1000);
+})();
+</script>
 </body>
 </html>
