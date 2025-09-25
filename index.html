@@ -1,46 +1,63 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>출석 이동 중…</title>
-<style>
-  :root{color-scheme:light dark}
-  body{font-family:system-ui,Arial,"Apple SD Gothic Neo","맑은 고딕",sans-serif;margin:24px;line-height:1.5}
-  .muted{color:#666}.btn{display:inline-block;padding:10px 14px;border:1px solid #ddd;border-radius:10px;background:#fff;text-decoration:none}
-</style>
-<meta name="referrer" content="no-referrer">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="referrer" content="no-referrer"/>
+  <title>출석 이동</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, Arial, "Apple SD Gothic Neo", "맑은 고딕", sans-serif; margin: 24px; line-height: 1.5; }
+    .muted { color: #666; }
+    .mono { font-family: ui-monospace, Menlo, Consolas, "Liberation Mono", monospace; word-break: break-all; }
+    .btn { display: inline-block; padding: 12px 16px; border: 1px solid #ddd; border-radius: 10px; background: #fff; text-decoration: none; cursor: pointer; }
+    .btn.secondary { background: #f7f7f7; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+    .card { border: 1px solid #eee; border-radius: 12px; padding: 14px; }
+  </style>
 </head>
 <body>
-<h1 style="margin:0 0 12px 0;font-size:18px">출석 페이지로 이동 중…</h1>
-<p class="muted" id="info">자동으로 이동하지 않으면 아래 버튼을 누르세요.</p>
+  <h1 style="margin:0 0 8px 0;font-size:18px;">출석 페이지로 이동</h1>
+  <p class="muted">아래 버튼을 <b>한 번</b> 눌러 출석 페이지로 이동하세요. (카메라/카톡 미리보기에서는 자동 이동하지 않습니다)</p>
 
-<!-- ★ 여기를 “현재” Apps Script 웹앱 실행 URL(/exec)로 교체 -->
-<form id="relay" method="POST"
-      action="https://script.google.com/macros/s/AKfycbxAwb1Ao8bpEFF6eHfWgJ2dA5PrD9unWE_FJL-PGufBJfbr6hwVXJbqJYJv4Jw3Yfdc/exec"
-      target="_self" accept-charset="utf-8">
-  <input type="hidden" name="k" id="k">
-  <button class="btn" type="submit">수동으로 이동</button>
-</form>
+  <div class="card">
+    <div class="row">
+      <a id="go" class="btn" href="#" target="_self" rel="nofollow">출석 링크로 이동</a>
+      <button id="copy" class="btn secondary" type="button">링크 복사</button>
+    </div>
+    <div id="link" class="mono muted" style="font-size:12px;"></div>
+  </div>
 
-<p style="margin-top:12px;display:none" id="fail">
-  문제가 지속되면 다음 링크를 눌러 이동하세요:
-  <a class="btn" id="getlink" href="#">수동 이동(대체)</a>
-</p>
+  <script>
+  (function () {
+    // ❗❗ 여기를 "현재 배포된 Apps Script 웹앱 실행 URL(/exec)"로 교체하세요.
+    var EXEC_URL = 'https://script.google.com/macros/s/AKfycbxAwb1Ao8bpEFF6eHfWgJ2dA5PrD9unWE_FJL-PGufBJfbr6hwVXJbqJYJv4Jw3Yfdc/exec';
 
-<script>
-(function(){
-  function pick(n){ const s=new URLSearchParams(location.search); const h=new URLSearchParams((location.hash||'').replace(/^#/,'')); return s.get(n)||h.get(n); }
-  var k=pick('k'); if(!k){ document.body.innerHTML='<p>잘못된 QR입니다(k 없음).</p>'; return; }
-  var form=document.getElementById('relay'); document.getElementById('k').value=k;
+    function pick(name){
+      const s = new URLSearchParams(location.search);
+      const h = new URLSearchParams((location.hash||'').replace(/^#/, ''));
+      return s.get(name) || h.get(name);
+    }
 
-  // 실패 대비 GET 대체 링크
-  var alt=form.action.replace(/\/exec(?:\?.*)?$/,'/exec') + '?k=' + encodeURIComponent(k);
-  document.getElementById('getlink').href=alt;
+    var k = pick('k');
+    if (!k) {
+      document.body.innerHTML =
+        '<main class="card"><h3>잘못된 QR</h3><p class="muted">키(k)가 없습니다. QR을 다시 스캔해 주세요.</p></main>';
+      return;
+    }
 
-  try{ form.submit(); }catch(e){ setTimeout(function(){ try{ form.submit(); }catch(_){} }, 80); }
-  setTimeout(function(){ document.getElementById('fail').style.display='block'; }, 1000);
-})();
-</script>
+    var link = EXEC_URL + '?k=' + encodeURIComponent(k);
+    var go = document.getElementById('go');
+    var out = document.getElementById('link');
+
+    go.href = link;
+    out.textContent = link;
+
+    document.getElementById('copy').onclick = async function () {
+      try { await navigator.clipboard.writeText(link); alert('링크가 복사되었습니다.'); }
+      catch (_) { prompt('아래 링크를 복사하세요', link); }
+    };
+  })();
+  </script>
 </body>
 </html>
